@@ -9,6 +9,9 @@ RUN apk add --no-cache openssl
 COPY package*.json ./
 RUN npm install --production
 
+COPY certs/root.crt /etc/ssl/certs/
+RUN chmod 644 /etc/ssl/certs/root.crt
+
 # Luego copia el resto de archivos
 COPY . .
 
