@@ -1,16 +1,19 @@
-FROM node:18-alpine
+FROM debian:bullseye
 
+# Instala solo lo esencial
+RUN apt-get update && \
+    apt-get install -y curl make g++ && \
+    curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copia certificado SSL
+COPY certs/ca.pem /certs/
+
+# Copia proyecto
+COPY . /app
 WORKDIR /app
-
-# Copia el certificado SSL (generado en el workflow)
-COPY certs/ca.pem /app/certs/
-
-# Copia el código
-COPY package*.json ./
-COPY public/ ./public/
-COPY server.js ./
-
-RUN npm install --production
+RUN npm install
 
 EXPOSE 8900
-CMD ["node", "server.js"]
+CMD ["node", "index.js"]
