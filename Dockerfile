@@ -1,14 +1,16 @@
-FROM debian:bullseye
-RUN apt-get update
+FROM node:18-alpine
 
-RUN apt-get install -y curl make g++
+WORKDIR /app
 
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
+# Copia el certificado SSL (generado en el workflow)
+COPY certs/ca.pem /app/certs/
 
-ADD . /
-RUN npm install
+# Copia el código
+COPY package*.json ./
+COPY public/ ./public/
+COPY server.js ./
+
+RUN npm install --production
 
 EXPOSE 8900
-
-CMD  ["node", "index.js"]
+CMD ["node", "server.js"]
