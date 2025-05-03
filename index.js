@@ -4,7 +4,7 @@ const fs = require('fs');
 const { Sequelize } = require('sequelize');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8900;
 
 // Configurar Sequelize con SSL usando certificado desde archivo
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
