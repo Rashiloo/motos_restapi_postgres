@@ -1,23 +1,23 @@
-# Imagen base oficial de Node.js
-FROM node:18
+FROM node:20-alpine
 
-# Crear y establecer el directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos necesarios del proyecto
+# Instala dependencias SSL
+RUN apk add --no-cache openssl
+
+# Primero copia solo lo necesario para instalar dependencias
 COPY package*.json ./
-COPY index.js ./
-COPY root.crt ./  # Este es tu certificado
+RUN npm install --production
 
-# Instalar dependencias
-RUN npm install --omit=dev
+# Luego copia el resto de archivos
+COPY . .
 
-# Establecer variable de entorno para producción
-ENV NODE_ENV=production
+# Asegura que la carpeta certs exista (si aún la necesitas)
+RUN mkdir -p /app/certs
 
-# Exponer el puerto en el que corre la app (ajusta si usas otro)
+# Variables de entorno
+ENV NODE_ENV=production \
+    PORT=8900
+
 EXPOSE 8900
-
-# Comando para iniciar la aplicación
 CMD ["node", "index.js"]
-
