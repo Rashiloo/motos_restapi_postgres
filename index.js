@@ -7,11 +7,19 @@ const app = express();
 // Configuración robusta de conexión PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.PGSSLROOTCERT ? {
+  ssl: {
     rejectUnauthorized: true,
     ca: process.env.PGSSLROOTCERT,
-    checkServerIdentity: () => undefined // Ignora verificación de hostname
-  } : false
+    // Solución específica para Aiven:
+    checkServerIdentity: (host, cert) => {
+      const aivenDomains = ['aivencloud.com', 'aiven.io'];
+      const validCN = aivenDomains.some(domain => cert.subject.CN.includes(domain));
+      
+      if (!validCN) {
+        throw new Error(`Certificado no válido para Aiven. CN: ${cert.subject.CN}`);
+      }
+    }
+  }
 });
 
 // Verificación de conexión mejorada
