@@ -15,10 +15,6 @@ RUN npm install --omit=dev
 # Establecer variable de entorno para producción
 ENV NODE_ENV=production
 
-# Agregar el certificado a los certificados de confianza del sistema
-RUN cp root.crt /usr/local/share/ca-certificates/root.crt && \
-    update-ca-certificates
-
 # Exponer el puerto en el que corre la app (ajusta si usas otro)
 EXPOSE 8900
 
