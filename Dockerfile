@@ -1,20 +1,15 @@
-FROM node:20-alpine
+# Dockerfile
+FROM node:18
 
 WORKDIR /app
 
-# Instala herramientas SSL para verificación
-RUN apk add --no-cache openssl
-
-# Copia e instala dependencias
 COPY package*.json ./
-RUN npm install --production
+RUN npm install
 
-# Copia la aplicación
 COPY . .
 
-# Variables de entorno (se sobrescriben en Render)
-ENV NODE_ENV=production \
-    PORT=8900
+# Copia el certificado SSL al contenedor
+COPY root.crt /etc/ssl/certs/root.crt
 
-EXPOSE 8900
 CMD ["node", "index.js"]
+
