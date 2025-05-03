@@ -1,21 +1,20 @@
-// index.js
-const express = require('express');
 const fs = require('fs');
+const path = require('path');
 const { Sequelize } = require('sequelize');
 
-const app = express();
-const port = process.env.PORT || 8900;
+// Ruta al certificado
+const certPath = path.join(__dirname, 'certs', 'root.crt');
 
-// Configurar Sequelize con SSL usando certificado desde archivo
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
   dialectOptions: {
     ssl: {
       require: true,
       rejectUnauthorized: true,
-      ca: fs.readFileSync('/etc/ssl/certs/root.crt').toString(),
-    },
+      ca: fs.readFileSync(certPath).toString()
+    }
   },
+  logging: console.log // Opcional para desarrollo
 });
 
 // Test de conexión

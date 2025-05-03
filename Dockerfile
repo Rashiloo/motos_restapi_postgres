@@ -5,22 +5,19 @@ WORKDIR /app
 # Instala dependencias SSL
 RUN apk add --no-cache openssl
 
-# Primero copia solo lo necesario para instalar dependencias
+# 1. Crea directorio para certificados
+RUN mkdir -p /app/certs
+
+# 2. Copia el certificado primero (para mejor caché)
+COPY certs/root.crt /app/certs/
+RUN chmod 644 /app/certs/root.crt
+
+# 3. Instala dependencias
 COPY package*.json ./
 RUN npm install --production
 
-COPY certs/root.crt /etc/ssl/certs/
-RUN chmod 644 /etc/ssl/certs/root.crt
-
-# Luego copia el resto de archivos
+# 4. Copia el resto de la aplicación
 COPY . .
 
-# Asegura que la carpeta certs exista (si aún la necesitas)
-RUN mkdir -p /app/certs
-
-# Variables de entorno
-ENV NODE_ENV=production \
-    PORT=8900
-
 EXPOSE 8900
-CMD ["node", "index.js"]
+CMD ["node", "index.js"]  # Ajusta según tu archivo principal
