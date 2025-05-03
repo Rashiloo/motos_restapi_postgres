@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Motos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <h1>Gestión de Motos</h1>
+    </header>
+
+    <main class="container">
+        <section class="form-section">
+            <h2>Formulario</h2>
+            <div class="form-group">
+                <label for="id">ID</label>
+                <input type="text" id="id" readonly class="disabled-input" placeholder="Auto-generado">
+            </div>
+            <div class="form-group">
+                <label for="marca">Marca</label>
+                <input type="text" id="marca" placeholder="Ej: Yamaha" required>
+            </div>
+            <div class="form-group">
+                <label for="modelo">Modelo</label>
+                <input type="text" id="modelo" placeholder="Ej: MT-07" required>
+            </div>
+            <div class="form-group">
+                <label for="anio">Año</label>
+                <input type="number" id="anio" placeholder="Ej: 2023" min="1900" max="2099">
+            </div>
+            <div class="form-group">
+                <label for="cilindrada">Cilindrada (cc)</label>
+                <input type="number" id="cilindrada" placeholder="Ej: 700">
+            </div>
+            <div class="button-group">
+                <button onclick="postMoto()">Crear</button>
+                <button onclick="putMoto()">Guardar cambios</button>
+                <button onclick="clearForm()">Limpiar</button>
+                <button onclick="getMotos()">Actualizar Lista</button>
+            </div>
+        </section>
+
+        <section class="table-section">
+            <h2>Lista de Motos</h2>
+            <div id="notifications"></div>
+            <div id="resultado">
+                <p class="loading">Cargando motos...</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="callrestapi.js"></script>
+    <script>
+        function clearForm() {
+            $('#id').val('');
+            $('#marca').val('');
+            $('#modelo').val('');
+            $('#anio').val('');
+            $('#cilindrada').val('');
+        }
+
+        $(document).ready(function () {
+            getMotos();
+        });
+    </script>
+</body>
+</html>
