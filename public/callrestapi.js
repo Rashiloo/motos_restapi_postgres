@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8900/api/motos"; // Cambia por tu URL real
+const API_URL = "/api/motos"; // Cambia por tu URL real
 
 function getMotos() {
     $("#resultado").html("<p class='loading'>Cargando motos...</p>");
