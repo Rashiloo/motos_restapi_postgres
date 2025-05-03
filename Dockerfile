@@ -1,16 +1,20 @@
-FROM debian:bullseye
+FROM node:20-alpine
 
-# 1. Instala dependencias
-RUN apt-get update && \
-    apt-get install -y curl make g++ && \
-    curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
-
-# 2. Copia el proyecto
-COPY . /app
 WORKDIR /app
+
+# Instala herramientas SSL para verificación
+RUN apk add --no-cache openssl
+
+# Copia e instala dependencias
+COPY package*.json ./
 RUN npm install --production
+
+# Copia la aplicación
+COPY . .
+
+# Variables de entorno (se sobrescriben en Render)
+ENV NODE_ENV=production \
+    PORT=8900
 
 EXPOSE 8900
 CMD ["node", "index.js"]

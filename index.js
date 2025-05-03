@@ -2,29 +2,31 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 
-// Configura Express
 const app = express();
 
-// Conexión a PostgreSQL (Aiven) con SSL via variables de entorno
+// Configuración robusta de conexión PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.PGSSLROOTCERT ? {
     rejectUnauthorized: true,
-    ca: process.env.PGSSLROOTCERT  // Certificado desde variable de entorno
+    ca: process.env.PGSSLROOTCERT,
+    checkServerIdentity: () => undefined // Ignora verificación de hostname
   } : false
 });
 
 // Verificación de conexión mejorada
 (async () => {
   try {
-    await pool.query('SELECT 1');
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    client.release();
     console.log('✅ Conexión a PostgreSQL verificada');
   } catch (err) {
-    console.error('❌ Error al conectar a PostgreSQL:', err.message);
-    console.log('Soluciona esto:');
-    console.log('1. Verifica DATABASE_URL en Render');
-    console.log('2. Revisa PGSSLROOTCERT (debe incluir BEGIN/END CERTIFICATE)');
-    console.log('3. Asegúrate que la BD acepte conexiones SSL');
+    console.error('❌ Error de conexión:', err.message);
+    console.log('\nSOLUCIÓN:');
+    console.log('1. Verifica que DATABASE_URL tenga ?ssl=true&sslmode=verify-full');
+    console.log('2. Revisa que PGSSLROOTCERT contenga el certificado PEM completo');
+    console.log('3. Confirma que el servidor PostgreSQL esté accesible');
     process.exit(1);
   }
 })();
@@ -33,34 +35,30 @@ const pool = new Pool({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API: Ejemplo de ruta para obtener motos
+// Endpoint de ejemplo
 app.get('/api/motos', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM motos');
-    res.json({ motos: rows });
+    res.json(rows);
   } catch (err) {
-    const errorResponse = {
-      error: 'Error al obtener motos',
-      ...(process.env.NODE_ENV === 'development' && { 
-        details: err.message,
-        stack: err.stack 
-      })
-    };
-    res.status(500).json(errorResponse);
+    res.status(500).json({
+      error: 'Error en la consulta',
+      ...(process.env.NODE_ENV !== 'production' && { details: err.message })
+    });
   }
 });
 
-// Manejo de rutas no encontradas
-app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+// Manejo de errores
+app.use((err, req, res, next) => {
+  res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-// Inicia el servidor
+// Inicio del servidor
 const PORT = process.env.PORT || 8900;
 app.listen(PORT, () => {
   console.log(`
-  🚀 Servidor listo en http://localhost:${PORT}
-  Entorno: ${process.env.NODE_ENV || 'development'}
-  SSL: ${process.env.PGSSLROOTCERT ? 'Configurado' : 'No configurado'}
+  🚀 Servidor activo en puerto ${PORT}
+  Modo: ${process.env.NODE_ENV || 'development'}
+  Conexión SSL: ${process.env.PGSSLROOTCERT ? '✅ Configurada' : '⚠️ Desactivada'}
   `);
 });
