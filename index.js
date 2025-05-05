@@ -1,38 +1,8 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-// Ruta al certificado
-const certPath = path.join(__dirname, 'certs', 'root.crt');
+const server = require('./server');
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: true,
-      ca: fs.readFileSync(certPath).toString()
-    }
-  },
-  logging: console.log // Opcional para desarrollo
-});
+const PORT = process.env.PORT || 8900;
 
-// Test de conexión
-sequelize.authenticate()
-  .then(() => {
-    console.log('Conexión a la base de datos exitosa.');
-  })
-  .catch(err => {
-    console.error('No se pudo conectar a la base de datos:', err);
-  });
-
-app.get('/', (req, res) => {
-  res.send('API funcionando correctamente 🚀');
-});
-
-app.listen(port, () => {
-  console.log(`Servidor corriendo en puerto ${port}`);
-});
-
+server.listen(PORT, () => console.log(`Server is live at localhost:${PORT}`));
 

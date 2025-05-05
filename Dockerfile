@@ -1,23 +1,14 @@
-FROM node:20-alpine
+FROM debian:bullseye
+RUN apt-get update
 
-WORKDIR /app
+RUN apt-get install -y curl make g++
 
-# Instala dependencias SSL
-RUN apk add --no-cache openssl
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
+RUN apt-get install -y nodejs
 
-# 1. Crea directorio para certificados
-RUN mkdir -p /app/certs
-
-# 2. Copia el certificado primero (para mejor caché)
-COPY certs/root.crt /app/certs/
-RUN chmod 644 /app/certs/root.crt
-
-# 3. Instala dependencias
-COPY package*.json ./
-RUN npm install --production
-
-# 4. Copia el resto de la aplicación
-COPY . .
+ADD . /
+RUN npm install
 
 EXPOSE 8900
-CMD ["node", "index.js"]  # Ajusta según tu archivo principal
+
+CMD  ["node", "index.js"]
